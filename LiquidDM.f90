@@ -1,8 +1,6 @@
 program LiquidDM
 implicit none
 
-
-
 real::    sen, sez           
 integer:: z, n, a, i, temp
 integer:: nfinn, zfinn, nfinz, zfinz
@@ -13,9 +11,9 @@ integer, allocatable :: ndripndep(:)   !array of z values for neutron drip the f
 integer, allocatable :: zdripndep(:)
 real,    allocatable :: BindEM(:,:)
 
-open(unit=32, file="ProtonDripline.dat", status="unknown")
-open(unit=33, file="NeutronDripline.dat", status="unknown")
-open(unit=36, file="test.dat", status="unknown")
+open(unit=32,  file="ProtonDripline.dat",   status="unknown")
+open(unit=33,  file="NeutronDripline.dat",  status="unknown")
+open(unit=36,  file="test.dat",             status="unknown")
 
 
 !/////////////////////////////////////////////////////////////////
@@ -24,18 +22,18 @@ write(*, "(A)", advance="NO") "desired n range for protron drip: nfinz="      !o
 read *, nfinz                        
 zfinz=4*nfinz
 
-write(*, "(A)", advance="NO") "desired z range for neutron drip: zfinn="      !outer loop limit value should be smaller than the inner loop limit value      
-read *, zfinn 
-nfinn=4*zfinn                   
+!write(*, "(A)", advance="NO") "desired z range for neutron drip: zfinn="      !outer loop limit value should be smaller than the inner loop limit value      
+!read *, zfinn 
+!nfinn=4*zfinn                   
 !/////////////////////////////////////////////////////////////////
 !/////////////////////////////////////////////////////////////////
 allocate(bez(zfinz))
 allocate(zdripndep(nfinz))
 
-allocate(ben(nfinn))
-allocate(ndripzdep(zfinn))
+!allocate(ben(nfinn))
+!allocate(ndripzdep(zfinn))
 
-allocate(ndripndep(zfinn))
+!allocate(ndripndep(zfinn))
 
 
 !=================================================================
@@ -67,7 +65,13 @@ end do nlpA
 !=================================================================
 !=========SEC 3 Neutron drip line=================================
 !=================================================================    
-zloopA: do z=1, zfinn
+
+zfinn=zdripndep(nfinz)
+allocate(ndripzdep(zfinn))
+nfinn=4*zfinn                   
+allocate(ben(nfinn))
+
+zloopA: do z=1, zfinn 
 
 
 nloopB: do n=ndripzdep(z-1), nfinn
@@ -115,24 +119,52 @@ end do prn4A
 !=================================================================
 !=================================================================
 
-allocate(BindEM(zfinn,ndripzdep(zfinn)))
+!allocate(BindEM(2*ndripzdep(zfinn),2*ndripzdep(zfinn)))
+!allocate(BindEM(zdripndep(nfinz), zdripndep(nfinz)))
+!allocate(BindEM(nfinz, nfinz))
+allocate(  BindEM( zfinn, nfinz )  )
+!Do A=2, nfinz
+!do z=1, A-1
+!N=A-z
+do z=1, zfinn
 
-Do A=2, 100
-do z=1, A-1
-N=A-z
-print *, ' '
-if(z<=zdripndep(n)) then
-if(n<=ndripzdep(z)) then
+do n=ndripzdep(z), nfinz !ndripzdep(zfinn)
+
+if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
 write(36, *) n, z
-call BindingE(z, n, BindEM(z,n))
-print *, a, z, n, BindEM(z,n)
-end if
+!call BindingE(z, n, BindEM(z,n))
+print *, z, n, BindEM(z,n)
 end if
 
 end do
+
 end do
 
 
+
+!if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
+!write(36, *) n, z
+!call BindingE(z, n, BindEM(z,n))
+!print *, a, z, n!, BindEM(z,n)
+!end if
+
+!end do
+!end do
+
+!Do A=nfinz, 2
+!do z=A-1, 1, -1
+!z=A-1
+!do while(z /= 1)
+!N=A-z
+
+!if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
+!write(36, *) n, z
+!call BindingE(z, n, BindEM(z,n))
+!print *, a, z, n!, BindEM(z,n)
+!end if
+!z=z-1
+!end do
+!end do
 
 !do n=2, ndripzdep(zfinn)
 
