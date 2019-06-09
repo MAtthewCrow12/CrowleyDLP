@@ -116,7 +116,7 @@ end do prn4A
 
 !=================================================================
 !=================================================================
-!===================finding binding energy========================
+!===================finding binding energies======================
 !=================================================================
 !=================================================================
 
@@ -127,13 +127,13 @@ allocate(  BindEM( zfinn, nfinz )  )
 !Do A=2, nfinz
 !do z=1, A-1
 !N=A-z
-do z=1, zfinn
 
-do n=ndripzdep(z), nfinz !ndripzdep(zfinn)
+do z=1, zfinn
+do n=1, nfinz !ndripzdep(zfinn)
 
 if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
 write(36, *) n, z
-!call BindingE(z, n, BindEM(z,n))
+call BindingE(z, n, BindEM(z,n))
 print *, z, n, BindEM(z,n)
 end if
 
