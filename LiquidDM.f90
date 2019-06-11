@@ -161,7 +161,7 @@ write (*, 46) j+g+f
 43 format ("Binding Energy function called: ", I9, " times by Proton Drip line." /)
 44 format ("Binding Energy function called: ", I9, " times by Neutron Drip Line."  /)
 45 format ("Binding Energy function called: ", I9, " times by Binding Energy Matrix." /)
-46 format ("Total Binding Energy calls: ", I9 /)
+46 format ("Total Binding Energy calls: ",     I9 /)
 
 !if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
 !write(36, *) n, z
