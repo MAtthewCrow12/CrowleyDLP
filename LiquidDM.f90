@@ -47,14 +47,14 @@ allocate(zdripndep(nfinz))
 nlpA: do n=1, nfinz
 
 
-zlpB: do z=zdripndep(n-1), zfinz
+zlpB: do z=zdripndep(n-1), zdripndep(n-1)+5!zfinz
 call BindingE(z,n,bez(z))
 f=f+1
 write(43, *) n, z
 end do zlpB
 
 !finding the separation energy: the difference between binding energies incremented z 
-sepEzB: do z=zdripndep(n-1), zfinz
+sepEzB: do z=zdripndep(n-1),   zfinz
 
 sez=bez(z+1)-bez(z)
 if (sez<0.) then 
@@ -81,7 +81,7 @@ allocate(ben(nfinn))
 zloopA: do z=1, zfinn 
 
 
-nloopB: do n=ndripzdep(z-1), nfinn
+nloopB: do n=ndripzdep(z-1), ndripzdep(z-1)+5    !nfinn
 call BindingE(z, n, ben(n))
 write(44, *) n, z
 g=g+1
@@ -154,12 +154,14 @@ write (*, 32) zfinn, nfinz
 
 32 format ( /, "binding energy values have been found in a ", I3, " by ", I3, " matrix." /, /)
 
-write (*, 43)  f
+write (*, 43) f
 write (*, 44) g
-write (*, 45) j+g+f
+write (*, 45) j
+write (*, 46) j+g+f
 43 format ("Binding Energy function called: ", I9, " times by Proton Drip line." /)
 44 format ("Binding Energy function called: ", I9, " times by Neutron Drip Line."  /)
-45 format ("Total Binding Energy calls: ", I9 /)
+45 format ("Binding Energy function called: ", I9, " times by Binding Energy Matrix." /)
+46 format ("Total Binding Energy calls: ", I9 /)
 
 !if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
 !write(36, *) n, z
