@@ -2,7 +2,7 @@ program LiquidDM
 implicit none
 
 real::    sen, sez           
-integer:: z, n, a, i, temp
+integer:: z, n, a, i, temp, j=0,f=0, g=0
 integer:: nfinn, zfinn, nfinz, zfinz
 
 real,    allocatable :: ben(:), bez(:)
@@ -13,7 +13,11 @@ real,    allocatable :: BindEM(:,:)
 
 open(unit=32,  file="ProtonDripline.dat",   status="unknown")
 open(unit=33,  file="NeutronDripline.dat",  status="unknown")
-open(unit=36,  file="test.dat",             status="unknown")
+open(unit=37,  file="BindingEnergies.dat",  status="unknown")
+
+open(unit=43,  file="ZDripTest.dat",        status="unknown")
+open(unit=44,  file="NDripTest.dat",        status="unknown")
+open(unit=36,  file="BEMattest.dat",        status="unknown")
 
 !change to matthew's branch
 
@@ -45,6 +49,8 @@ nlpA: do n=1, nfinz
 
 zlpB: do z=zdripndep(n-1), zfinz
 call BindingE(z,n,bez(z))
+f=f+1
+write(43, *) n, z
 end do zlpB
 
 !finding the separation energy: the difference between binding energies incremented z 
@@ -77,6 +83,8 @@ zloopA: do z=1, zfinn
 
 nloopB: do n=ndripzdep(z-1), nfinn
 call BindingE(z, n, ben(n))
+write(44, *) n, z
+g=g+1
 end do nloopB
         
 !finding the separation energy: the difference between binding energies incremented n
@@ -132,16 +140,26 @@ do z=1, zfinn
 do n=1, nfinz !ndripzdep(zfinn)
 
 if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-write(36, *) n, z
+write(36, *) n, z !Binding Energy test
 call BindingE(z, n, BindEM(z,n))
-print *, z, n, BindEM(z,n)
+write(37, *)  n,  BindEM(z,n)
+!print *, z, n, BindEM(z,n)
+j=j+1
 end if
 
 end do
 
 end do
+write (*, 32) zfinn, nfinz
 
+32 format ( /, "binding energy values have been found in a ", I3, " by ", I3, " matrix." /, /)
 
+write (*, 43)  f
+write (*, 44) g
+write (*, 45) j+g+f
+43 format ("Binding Energy function called: ", I9, " times by Proton Drip line." /)
+44 format ("Binding Energy function called: ", I9, " times by Neutron Drip Line."  /)
+45 format ("Total Binding Energy calls: ", I9 /)
 
 !if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
 !write(36, *) n, z
