@@ -1,0 +1,130 @@
+program test
+implicit none
+integer :: n, z, ZDnrange
+integer, allocatable :: zdripndep(:)
+
+
+open(unit=20,  file="Zdrip.dat",                status="unknown")
+open(unit=21,  file="Zdripsearch.dat",          status="unknown")
+
+write(*, "(A)", advance="NO") "desired n range for protron drip: nfinz=" 
+read *, ZDnrange
+
+allocate (zdripndep(ZDnrange))
+call ProtonDripLine(ZDnrange, zdripndep)
+!call NeutronDripLine()
+
+end program test
+
+
+
+
+subroutine ProtonDripLine(ZDnrange, zdripndep)
+implicit none
+integer :: n, z, temp
+integer :: ZDnrange, ZDzrange
+integer :: zdripndep(ZDnrange)
+real    :: bez(4*ZDnrange)
+real    :: sez
+
+!============================================
+!============================================
+!============================================
+do n=1, ZDnrange
+
+    do z=1, zdripndep(n-1)+10
+        call BindingE(z,n,bez(z))
+        write(21, *) n, z
+    end do
+
+
+    do z=1, zdripndep(n-1)+10
+        sez=bez(z+1)-bez(z)
+        if (sez<0.) then 
+        zdripndep(n)=z
+        exit       
+        end if 
+    end do  
+
+
+end do
+!============================================
+!============================================
+!============================================
+do n=1, ZDnrange !SEC 1 
+    write(20,*) n, zdripndep(n)
+    print *,  n, zdripndep(n)
+end do 
+
+end subroutine ProtonDripLine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!-------------------------------------
+!-------------------------------------
+!-------------------------------------
+!-------------------------------------
+!-------------------------------------
+!subroutine to find the binding energy
+subroutine BindingE(z,n,be)
+implicit none
+real:: be, p1, p2, p3, p4, p5
+integer:: z, n, a
+a=z+n
+!-----------------------------
+!----------LQDM---------------
+!-----------------------------
+p1 =15.5*(A)
+p2=  -16.8*(A**(2./3.))
+p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
+p4= -(23.*((Z-N)**2.))/A
+!||||||||||||||||||||||||||||||||||
+if(    (mod(z,2)==0)  ) then
+if(    (mod(n,2)==0)  ) then
+p5=34.*(a**(-3./4.))
+!print *, "p5 z,n= even"
+end if
+if(    (mod(n,2)==1)  ) then
+p5=0
+!a is odd
+end if
+end if !main if
+if(    (mod(z,2)==1)  ) then
+if(    (mod(n,2)==1)  ) then
+p5=-34.*(a**(-3./4.))
+!print *, "p5 z,n= odd"
+end if
+if(    (mod(n,2)==0)  ) then
+p5=0
+!a is odd
+end if
+end if !main if
+!p5=0 !ignoring P5
+!-----------------------------
+BE= p1+p2+p3+p4+p5 !creating array of binding energy dependent on N
+!-----------------------------
+!-----------------------------
+!-----------------------------
+end subroutine bindingE
