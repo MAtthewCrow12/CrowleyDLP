@@ -18,22 +18,22 @@ open(unit=26,  file="SEPTEST.dat",              status="unknown")
 !}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 !}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 write(*, "(A)", advance="NO") "desired n range" !}}}}}}}}}}}}}}}}}}}}}}}}}} INPUT THE N RANGE 
-read *, ZDnrange!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+read *, ZDnrange!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} 
 !}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 !}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 
-allocate (zdripndep(ZDnrange))
-call ProtonDripLine(ZDnrange, zdripndep)
+!allocate (zdripndep(ZDnrange))
+!call ProtonDripLine(ZDnrange, zdripndep)
 
 
-NDzrange=zdripndep(ZDnrange)
-allocate (ndripzdep(NDzrange))
-call NeutronDripLine(NDzrange, ndripzdep)
+!NDzrange=zdripndep(ZDnrange)
+!allocate (ndripzdep(NDzrange))
+!call NeutronDripLine(NDzrange, ndripzdep)
 
 !call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
-!call BindingEnergy(ZDnrange)
+call BindingEnergy(ZDnrange)
 
 
 end program LiquidDM
@@ -60,9 +60,7 @@ sepE=besecond-befirst
 
 write(21, *) n, z
 
-
-!print *, "n=", n, " z=", z, " sepE=", sepE
-if (sepE<0 .and. besecond>0 .and. sepE<0)then
+if (sepE<0 .and. besecond>0 .and. befirst>0)then
 zdripndep(n)=z
 initialz=z-10
 finalz=z+10
@@ -78,9 +76,6 @@ do n=1, ZDnrange
 print *, n, zdripndep(n)
 write(20, *) n, zdripndep(n)
 end do
-
-
-
 
 end subroutine ProtonDripLine
 
@@ -107,8 +102,7 @@ sepE=besecond-befirst
 
 write(23, *) n, z
 
-!print *, "n=", n, " z=", z, " sepE=", sepE
-if (sepE<0 .and. besecond>0 .and. sepE<0)then
+if (sepE<0 .and. besecond>0 .and. befirst>0)then
 ndripzdep(z)=n
 initialn=n-10
 finaln=n+10
@@ -116,10 +110,6 @@ exit
 else
 ndripzdep(z)=0
 end if
-
-
-
-
 end do
 end do
 
@@ -130,38 +120,6 @@ write(22, *)  ndripzdep(z), z
 end do
 
 end subroutine NeutronDripLine
-
-
-
-subroutine ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
-implicit none
-integer :: n, z
-integer :: ZDnrange, ZDmaxzrange
-integer :: zdripndep(ZDnrange)
-real    :: bez(ZDnrange)
-real    :: sez
-ZDmaxzrange=ZDnrange
-
-do n=1, ZDnrange
-    do z=1, ZDmaxzrange
-
-        call BindingE(z, n, bez(z))
-        call BindingE(z+1, n, bez(z+1))
-        write(25, *) n, bez(z) 
-        if(bez(z+1)>0 .and. bez(z)>0) then    
-        sez=bez(z+1)-bez(z)
-        if(sez>0)then
-        write(26, *) n, sez
-        end if
-        end if
-
-    end do 
-end do
-
-end subroutine ProntonDripSeparationBindingEnergy
-
-
-
 
 
 subroutine BindingEnergy(ZDnrange)
@@ -200,8 +158,41 @@ end do
 
 print *, "ZDnrange=", ZDnrange, "NDzrange=", NDzrange
 
+print *, BindingEarr
 
 end subroutine BindingEnergy
+
+
+subroutine ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
+implicit none
+integer :: n, z
+integer :: ZDnrange, ZDmaxzrange
+integer :: zdripndep(ZDnrange)
+real    :: bez(ZDnrange)
+real    :: sez
+ZDmaxzrange=ZDnrange
+
+do n=1, ZDnrange
+    do z=1, ZDmaxzrange
+
+        call BindingE(z, n, bez(z))
+        call BindingE(z+1, n, bez(z+1))
+        write(25, *) n, bez(z) 
+        if(bez(z+1)>0 .and. bez(z)>0) then    
+        sez=bez(z+1)-bez(z)
+        if(sez>0)then
+        write(26, *) n, sez
+        end if
+        end if
+
+    end do 
+end do
+
+end subroutine ProntonDripSeparationBindingEnergy
+
+
+
+
 
 
 
