@@ -13,8 +13,7 @@ open(unit=24,  file="BindingEnergy.dat",        status="unknown")
 !Test files
 open(unit=25,  file="BETEST.dat",               status="unknown")
 open(unit=26,  file="SEPTEST.dat",              status="unknown")
-
-
+!check
 
 write(*, "(A)", advance="NO") "desired n range for protron drip: nfinz=" 
 read *, ZDnrange
