@@ -1,4 +1,4 @@
-program test
+program LiquidDM
 implicit none
 integer :: n, z, ZDnrange, NDzrange
 integer, allocatable :: zdripndep(:)
@@ -9,148 +9,36 @@ open(unit=21,  file="Zdripsearch.dat",          status="unknown")
 open(unit=22,  file="Ndrip.dat",                status="unknown")
 open(unit=23,  file="Ndripsearch.dat",          status="unknown")
 open(unit=24,  file="BindingEnergy.dat",        status="unknown")
-
-!Test files
 open(unit=25,  file="BETEST.dat",               status="unknown")
 open(unit=26,  file="SEPTEST.dat",              status="unknown")
-!check
-
-write(*, "(A)", advance="NO") "desired n range for protron drip: nfinz=" 
-read *, ZDnrange
 
 
 
-allocate (zdripndep(ZDnrange))
-!call ProtonDripLine(ZDnrange, zdripndep)
-call testProtonDripLine(ZDnrange, zdripndep)
-!call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+write(*, "(A)", advance="NO") "desired n range" !}}}}}}}}}}}}}}}}}}}}}}}}}} INPUT THE N RANGE 
+read *, ZDnrange!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-NDzrange=zdripndep(ZDnrange)
-allocate (ndripzdep(NDzrange))
-call testNeutronDripLine(NDzrange, ndripzdep)
-!call NeutronDripLine(NDzrange, ndripzdep)
-
-
-!call BindingEnergy(ZDnrange)
-
-
-end program test
-
-subroutine ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
-implicit none
-integer :: n, z
-integer :: ZDnrange, ZDmaxzrange
-integer :: zdripndep(ZDnrange)
-real    :: bez(ZDnrange)
-real    :: sez
-ZDmaxzrange=ZDnrange
-
-do n=1, ZDnrange
-    do z=1, ZDmaxzrange
-
-        call BindingE(z, n, bez(z))
-        call BindingE(z+1, n, bez(z+1))
-        write(25, *) n, bez(z) 
-        if(bez(z+1)>0 .and. bez(z)>0) then    
-        sez=bez(z+1)-bez(z)
-        if(sez>0)then
-        write(26, *) n, sez
-        end if
-        end if
-
-    end do 
-end do
-end subroutine ProntonDripSeparationBindingEnergy
-
-
-
-
-
-subroutine BindingEnergy(ZDnrange)
-implicit none 
-integer :: n, z, ZDnrange, NDzrange
-integer, allocatable :: zdripndep(:)
-integer, allocatable :: ndripzdep(:)
-real,    allocatable :: BindingEarr(:,:)
 
 allocate (zdripndep(ZDnrange))
 call ProtonDripLine(ZDnrange, zdripndep)
+
+
 NDzrange=zdripndep(ZDnrange)
 allocate (ndripzdep(NDzrange))
 call NeutronDripLine(NDzrange, ndripzdep)
-allocate (BindingEarr(NDzrange, ZDnrange))
 
-do n=1, ZDnrange
-   do z=1, NDzrange
-       if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-       write(24, *) n, z !Binding Energy test
-        call BindingE(z, n, BindingEarr(z,n))
-        end if
-    end do
-end do
-
-do n=1, ZDnrange
-    do z=1, NDzrange
-
-    if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-    print *, "n=", n, "z=", z, "BE=", BindingEarr(z, n)
-    end if
-
-   end do
-end do
+!call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
+!call BindingEnergy(ZDnrange)
 
 
-print *, "ZDnrange=", ZDnrange, "NDzrange=", NDzrange
-
-
-end subroutine BindingEnergy
-
-
-
-
-
+end program LiquidDM
 
 subroutine ProtonDripLine(ZDnrange, zdripndep)
-implicit none
-integer :: n, z
-integer :: ZDnrange, ZDzrange
-integer :: zdripndep(ZDnrange)
-real    :: bez(4*ZDnrange)
-real    :: sez
-
-
-print *, zdripndep
-
-
-do n=1, ZDnrange
-
-    do z=1, zdripndep(n-1)+10
-        call BindingE(z,n,bez(z))
-        write(21, *) n, z
-    end do
-
-
-    do z=1, zdripndep(n-1)+10
-        sez=bez(z+1)-bez(z)
-        if (sez<0.) then 
-        zdripndep(n)=z
-        exit       
-        end if 
-    end do  
-
-end do
-do n=1, ZDnrange !SEC 1 
-    write(20,*) n, zdripndep(n)
-    print *,    "Proton Drip:   ", "n=", n, " z=", zdripndep(n)
-end do 
-
-end subroutine ProtonDripLine
-
-
-
-
-subroutine testProtonDripLine(ZDnrange, zdripndep)
 implicit none
 integer :: n, z
 integer :: ZDnrange
@@ -194,9 +82,9 @@ end do
 
 
 
-end subroutine
+end subroutine ProtonDripLine
 
-subroutine testNeutronDripLine(NDzrange, ndripzdep)
+subroutine NeutronDripLine(NDzrange, ndripzdep)
 integer :: n, z
 integer :: NDzrange
 integer :: ndripzdep(NDzrange)
@@ -241,12 +129,79 @@ print *, z, ndripzdep(z)
 write(22, *)  ndripzdep(z), z
 end do
 
+end subroutine NeutronDripLine
+
+
+
+subroutine ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
+implicit none
+integer :: n, z
+integer :: ZDnrange, ZDmaxzrange
+integer :: zdripndep(ZDnrange)
+real    :: bez(ZDnrange)
+real    :: sez
+ZDmaxzrange=ZDnrange
+
+do n=1, ZDnrange
+    do z=1, ZDmaxzrange
+
+        call BindingE(z, n, bez(z))
+        call BindingE(z+1, n, bez(z+1))
+        write(25, *) n, bez(z) 
+        if(bez(z+1)>0 .and. bez(z)>0) then    
+        sez=bez(z+1)-bez(z)
+        if(sez>0)then
+        write(26, *) n, sez
+        end if
+        end if
+
+    end do 
+end do
+
+end subroutine ProntonDripSeparationBindingEnergy
 
 
 
 
 
-end subroutine testNeutronDripLine
+subroutine BindingEnergy(ZDnrange)
+implicit none 
+integer :: n, z, ZDnrange, NDzrange
+integer, allocatable :: zdripndep(:)
+integer, allocatable :: ndripzdep(:)
+real,    allocatable :: BindingEarr(:,:)
+
+allocate (zdripndep(ZDnrange))
+call ProtonDripLine(ZDnrange, zdripndep)
+NDzrange=zdripndep(ZDnrange)
+allocate (ndripzdep(NDzrange))
+call NeutronDripLine(NDzrange, ndripzdep)
+allocate (BindingEarr(NDzrange, ZDnrange))
+
+do n=1, ZDnrange
+   do z=1, NDzrange
+       if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
+       write(24, *) n, z !Binding Energy test
+       call BindingE(z, n, BindingEarr(z,n))
+       end if
+   end do
+end do
+
+do n=1, ZDnrange
+    do z=1, NDzrange
+
+    if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
+    print *, "n=", n, "z=", z, "BE=", BindingEarr(z, n)
+    end if
+
+   end do
+end do
+
+
+print *, "ZDnrange=", ZDnrange, "NDzrange=", NDzrange
+
+
+end subroutine BindingEnergy
 
 
 
@@ -261,7 +216,53 @@ end subroutine testNeutronDripLine
 
 
 
-subroutine NeutronDripLine(NDzrange, ndripzdep)
+
+
+
+
+
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} currently this subroutine calculates the Proton Drip line as I used to.
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} I have since modified and placed in the regular proton drip line 
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+subroutine testProtonDripLine(ZDnrange, zdripndep)
+implicit none
+integer :: n, z
+integer :: ZDnrange, ZDzrange
+integer :: zdripndep(ZDnrange)
+real    :: bez(4*ZDnrange)
+real    :: sez
+
+
+print *, zdripndep
+
+
+do n=1, ZDnrange
+
+    do z=1, zdripndep(n-1)+10
+        call BindingE(z,n,bez(z))
+        write(21, *) n, z
+    end do
+
+
+    do z=1, zdripndep(n-1)+10
+        sez=bez(z+1)-bez(z)
+        if (sez<0.) then 
+        zdripndep(n)=z
+        exit       
+        end if 
+    end do  
+
+end do
+do n=1, ZDnrange !SEC 1 
+    write(20,*) n, zdripndep(n)
+    print *,    "Proton Drip:   ", "n=", n, " z=", zdripndep(n)
+end do 
+
+end subroutine testProtonDripLine
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+subroutine testNeutronDripLine(NDzrange, ndripzdep)
 implicit none
 integer :: n, z
 integer :: NDnrange, NDzrange
@@ -292,7 +293,10 @@ do z=1, NDzrange !SEC 1
     print *,    "Neutron Drip: ", " z=", z, " n=", ndripzdep(z)
 end do 
 
-end subroutine NeutronDripLine
+end subroutine testNeutronDripLine
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 
@@ -345,3 +349,16 @@ BE= p1+p2+p3+p4+p5 !creating array of binding energy dependent on N
 !-----------------------------
 !-----------------------------
 end subroutine bindingE
+
+
+
+
+
+
+
+
+
+
+
+
+
