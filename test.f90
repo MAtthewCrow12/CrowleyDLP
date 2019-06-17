@@ -27,8 +27,9 @@ call testProtonDripLine(ZDnrange, zdripndep)
 !call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
 
 
-!NDzrange=zdripndep(ZDnrange)
-!allocate (ndripzdep(NDzrange))
+NDzrange=zdripndep(ZDnrange)
+allocate (ndripzdep(NDzrange))
+call testNeutronDripLine(NDzrange, ndripzdep)
 !call NeutronDripLine(NDzrange, ndripzdep)
 
 
@@ -159,12 +160,12 @@ integer :: zdripndep(ZDnrange)
 real    :: befirst, besecond
 real    :: sepE 
 
-initialz=0
+initialz=-5
 finalz=20
 ZDmaxzrange=4*ZDnrange
 
 do n=1, ZDnrange
-do z=initialz, ZDmaxzrange
+do z=initialz, finalz
 
 call BindingE(z, n, befirst)
 call BindingE(z+1, n, besecond)
@@ -176,9 +177,11 @@ write(21, *) n, z
 !print *, "n=", n, " z=", z, " sepE=", sepE
 if (sepE<0 .and. besecond>0 .and. sepE<0)then
 zdripndep(n)=z
-initialz=z-5
-finalz=z+5
+initialz=z-10
+finalz=z+10
 exit
+else
+zdripndep(n)=0
 end if
 
 end do
@@ -186,7 +189,6 @@ end do
 
 do n=1, ZDnrange
 print *, n, zdripndep(n)
-
 write(20, *) n, zdripndep(n)
 end do
 
@@ -195,7 +197,57 @@ end do
 
 end subroutine
 
+subroutine testNeutronDripLine(NDzrange, ndripzdep)
+integer :: n, z
+integer :: NDzrange
+integer :: ndripzdep(NDzrange)
+integer :: initaln, finaln
+real    :: befirst, besecond, NDmaznrange
+real    :: sepE
 
+
+
+initialn=-5
+finaln=20
+NDmaznrange=4*NDzrange
+
+do z=1, NDzrange
+do n=initialn, finaln
+
+call BindingE(z, n, befirst)
+call BindingE(z, n+1, besecond)
+sepE=besecond-befirst
+
+write(23, *) n, z
+
+!print *, "n=", n, " z=", z, " sepE=", sepE
+if (sepE<0 .and. besecond>0 .and. sepE<0)then
+ndripzdep(z)=n
+initialn=n-10
+finaln=n+10
+exit
+else
+ndripzdep(z)=0
+end if
+
+
+
+
+end do
+end do
+
+
+do z=1, NDzrange
+print *, z, ndripzdep(z)
+write(22, *)  ndripzdep(z), z
+end do
+
+
+
+
+
+
+end subroutine testNeutronDripLine
 
 
 
