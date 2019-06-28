@@ -1,5 +1,7 @@
+
 program LiquidDM
 implicit none
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
 integer              ::  ZDnrange, NDzrange
@@ -62,234 +64,333 @@ do n=1, ZDnrange
     end do
 end do
 >>>>>>> Stashed changes
-
-real::    sen, sez           
-integer:: z, n, a, i, temp, j=0,f=0, g=0
-integer:: nfinn, zfinn, nfinz, zfinz
-
-real,    allocatable :: ben(:), bez(:)
-integer, allocatable :: ndripzdep(:)
-integer, allocatable :: ndripndep(:)   !array of z values for neutron drip the first neutron dependent the second proton dependent
+=======
+integer              ::  ZDnrange, NDzrange
 integer, allocatable :: zdripndep(:)
-real,    allocatable :: BindEM(:,:)
-
-open(unit=32,  file="ProtonDripline.dat",   status="unknown")
-open(unit=33,  file="NeutronDripline.dat",  status="unknown")
-open(unit=37,  file="BindingEnergies.dat",  status="unknown")
-
-open(unit=43,  file="ZDripTest.dat",        status="unknown")
-open(unit=44,  file="NDripTest.dat",        status="unknown")
-open(unit=36,  file="BEMattest.dat",        status="unknown")
-
-!change to matthew's branch
-
-!/////////////////////////////////////////////////////////////////
-!/////////////////////////////////////////////////////////////////
-write(*, "(A)", advance="NO") "desired n range for protron drip: nfinz="      !outer loop limit value should be smaller than the inner loop limit value 
-read *, nfinz                        
-zfinz=4*nfinz
-
-!write(*, "(A)", advance="NO") "desired z range for neutron drip: zfinn="      !outer loop limit value should be smaller than the inner loop limit value      
-!read *, zfinn 
-!nfinn=4*zfinn                   
-!/////////////////////////////////////////////////////////////////
-!/////////////////////////////////////////////////////////////////
-allocate(bez(zfinz))
-allocate(zdripndep(nfinz))
-
-!allocate(ben(nfinn))
-!allocate(ndripzdep(zfinn))
-
-!allocate(ndripndep(zfinn))
+integer, allocatable :: ndripzdep(:)
+>>>>>>> reformat-branch
 
 
-!=================================================================
-!===========SEC 1 Proton drip line================================
-!=================================================================
-nlpA: do n=1, nfinz
+integer, allocatable :: ndripzdep(:)
+!write(*, "(A)", advance="NO") "desired n range: "
+!read *, ZDnrange
+ZDnrange=177
 
 
-zlpB: do z=zdripndep(n-1), zdripndep(n-1)+5!zfinz
-call BindingE(z,n,bez(z))
-f=f+1
-write(43, *) n, z
-end do zlpB
-
-!finding the separation energy: the difference between binding energies incremented z 
-sepEzB: do z=zdripndep(n-1),   zfinz
-
-sez=bez(z+1)-bez(z)
-if (sez<0.) then 
-!}}}}}}}}}}}}}}}
-zdripndep(n)=z!}  !this array is the proton drip line z values dependent on n
-!}}}}}}}}}}}}}}}
-goto 111       
-end if 
-
-end do sepEzB  
-111 continue 
-
-
-end do nlpA
-!=================================================================
-!=========SEC 3 Neutron drip line=================================
-!=================================================================    
-
-zfinn=zdripndep(nfinz)
-allocate(ndripzdep(zfinn))
-nfinn=4*zfinn                   
-allocate(ben(nfinn))
-
-zloopA: do z=1, zfinn 
-
-
-nloopB: do n=ndripzdep(z-1), ndripzdep(z-1)+5    !nfinn
-call BindingE(z, n, ben(n))
-write(44, *) n, z
-g=g+1
-end do nloopB
-        
-!finding the separation energy: the difference between binding energies incremented n
-sepEnB: do n=ndripzdep(z-1), nfinn
-
-sen=ben(n+1)-ben(n)
-if (sen<0.) then 
-!}}}}}}}}}}}}}}}}
-ndripzdep(z)=n!}  this array is the NEUTRON DRIP LINE N VALUES DEPENDENT ON Z 
-!}}}}}}}}}}}}}}}} 
-goto 333
-end if
-
-end do sepEnB   
-333 continue
-
-
-end do zloopA
-!=================================================================
-!========SEC 5 printing/writing===================================
-!=================================================================
-prn1A: do n=1, nfinz !SEC 1 
-!||||||||||||||||||||||||||||||||
-!print *,  "n=", n, "z=", zdripndep(n),  "proton drip line value"
-!printing the proton drip line z values dependent on n
-write(32,*) n, zdripndep(n)
-!||||||||||||||||||||||||||||||||
-end do prn1A
-
-prn4A: do z=1, zfinn  !SEC 3
-!|||||||||||||||||||||||||||||||||||
-!print *, "z=", z, "n=", ndripzdep(z), "Neutron drip line value"
-!printing the Neutron drip line n values dependent on z
-write(33,*) ndripzdep(z), z
-!|||||||||||||||||||||||||||||
-end do prn4A 
-
-!=================================================================
-!=================================================================
-!===================finding binding energies======================
-!=================================================================
-!=================================================================
-
-!allocate(BindEM(2*ndripzdep(zfinn),2*ndripzdep(zfinn)))
-!allocate(BindEM(zdripndep(nfinz), zdripndep(nfinz)))
-!allocate(BindEM(nfinz, nfinz))
-allocate(  BindEM( zfinn, nfinz )  )
-!Do A=2, nfinz
-!do z=1, A-1
-!N=A-z
-
-do z=1, zfinn
-do n=1, nfinz !ndripzdep(zfinn)
-
-if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-write(36, *) n, z !Binding Energy test
-call BindingE(z, n, BindEM(z,n))
-write(37, *)  n,  BindEM(z,n)
-!print *, z, n, BindEM(z,n)
-j=j+1
-end if
-
-end do
-
-end do
-write (*, 32) zfinn, nfinz
-
-32 format ( /, "binding energy values have been found in a ", I3, " by ", I3, " matrix." /, /)
-
-write (*, 43) f
-write (*, 44) g
-write (*, 45) j
-write (*, 46) j+g+f
-43 format ("Binding Energy function called: ", I9, " times by Proton Drip line." /)
-44 format ("Binding Energy function called: ", I9, " times by Neutron Drip Line."  /)
-45 format ("Binding Energy function called: ", I9, " times by Binding Energy Matrix." /)
-46 format ("Total Binding Energy calls: ",     I9 /)
-
-!if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-!write(36, *) n, z
-!call BindingE(z, n, BindEM(z,n))
-!print *, a, z, n!, BindEM(z,n)
-!end if
-
-!end do
-!end do
-
-!Do A=nfinz, 2
-!do z=A-1, 1, -1
-!z=A-1
-!do while(z /= 1)
-!N=A-z
-
-!if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-!write(36, *) n, z
-!call BindingE(z, n, BindEM(z,n))
-!print *, a, z, n!, BindEM(z,n)
-!end if
-!z=z-1
-!end do
-!end do
-
-!do n=2, ndripzdep(zfinn)
-
-
-!do z=1, zdripndep(n)
-!if(n==ndripzdep(z))then
-!ndripndep(n)=z
-!goto 345
-!end if
-
-!end do 
-!345 continue
-!end do 
-
-
-!do n=2, ndripzdep(zfinn) 
-!i=1
-!do while (ndripndep(n)==0)
-!ndripndep(n)=ndripndep(n+i)
-!i=i+1
-!end do
-!write(36,*) n, ndripndep(n)
-!print *, 'n=', n, 'ndripndep(n)=', ndripndep(n), 'zdripndep(n)=', zdripndep(n)
-!end do
-
-!do n=2, ndripzdep(zfinn)
-!do z=ndripndep(n), zdripndep(n)
-!write(36,*) n, z
-!end do
-!end do
-!=================================================================
-!=================================================================
-!=================================================================
-!=================================================================
+!allocate (zdripndep(ZDnrange))
+!call ProtonDripLine(ZDnrange, zdripndep)
+!NDzrange=zdripndep(ZDnrange)
+!allocate (ndripzdep(NDzrange))
+!call NeutronDripLine(NDzrange, ndripzdep)
+!call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
+call BindingEnergy(ZDnrange)
 
 
 end program LiquidDM
-!-------------------------------------
-!-------------------------------------
-!-------------------------------------
-!-------------------------------------
-!-------------------------------------
+
+
+!    |||//   ||||||\
+!      //    ||    ||
+!     //     ||    ||
+!    //|||   ||||||/  
+subroutine ProtonDripLine(ZDnrange, zdripndep)
+implicit none
+integer :: n, z
+integer :: ZDnrange
+integer :: initialz, finalz, ZDmaxzrange
+integer :: zdripndep(ZDnrange)
+real    :: befirst, besecond
+real    :: sepE 
+
+
+open(unit=20,  file="Zdrip.dat",                status="unknown")
+open(unit=21,  file="Zdripsearch.dat",          status="unknown")
+
+
+initialz=-5
+finalz=20
+ZDmaxzrange=4*ZDnrange
+do n=1, ZDnrange
+    do z=initialz, finalz
+        call BindingE(z, n, befirst)
+        call BindingE(z+1, n, besecond)
+        sepE=besecond-befirst
+        write(21, *) n, z
+
+        if (sepE<0 .and. besecond>0 .and. befirst>0)then
+            zdripndep(n)=z
+            initialz=z-10
+            finalz=z+10
+            exit
+        else
+            zdripndep(n)=0
+        end if
+    end do
+end do
+
+
+do n=1, ZDnrange
+    !print *, "n=", n, "zdripndep(n)=", zdripndep(n)
+    write(20, *) n, zdripndep(n)
+end do
+
+
+end subroutine ProtonDripLine
+
+
+!  |\ || ||||||\
+!  |\\|| ||    ||
+!  ||\\| ||    ||
+!  || \| ||||||/    
+subroutine NeutronDripLine(NDzrange, ndripzdep)
+integer :: n, z
+integer :: NDzrange
+integer :: ndripzdep(NDzrange)
+integer :: initaln, finaln
+real    :: befirst, besecond, NDmaznrange
+real    :: sepE
+
+
+open(unit=22,  file="Ndrip.dat",                status="unknown")
+open(unit=23,  file="Ndripsearch.dat",          status="unknown")
+
+
+initialn=-5
+finaln=20
+NDmaznrange=4*NDzrange
+do z=1, NDzrange
+    do n=initialn, finaln
+        call BindingE(z, n, befirst)
+        call BindingE(z, n+1, besecond)
+        sepE=besecond-befirst
+        write(23, *) n, z
+        if (sepE<0 .and. besecond>0 .and. befirst>0)then
+            ndripzdep(z)=n
+            initialn=n-10
+            finaln=n+10
+            exit
+        else
+            ndripzdep(z)=0
+        end if
+    end do
+end do
+
+
+do z=1, NDzrange
+    !print *, "z=", z, "ndripzdep(z)=", ndripzdep(z)
+    write(22, *)  ndripzdep(z), z
+end do
+
+
+end subroutine NeutronDripLine
+
+
+! |||||\\    |||||||||
+! ||||||\\   ||
+! ||  |||||  ||
+! ||||||//   |||||||||
+! ||||||\\   |||||||||
+! ||  |||||  ||
+! ||||||//   ||
+! |||||//    |||||||||
+subroutine BindingEnergy(ZDnrange)
+implicit none 
+integer :: i, n, z, a, ZDnrange, NDzrange, lastn, lastz
+integer, allocatable :: zdripndep(:)
+integer, allocatable :: ndripzdep(:)
+real,    allocatable :: theBindingEnergy(:,:)
+real,    allocatable :: expBindingEnergy(:,:)
+integer              :: lowerbound(177)
+integer              :: upperbound(177)
+real                 :: expBindEnergy
+integer              :: dummy1
+character            :: dummy2
+
+
+!open statements
+open(unit=24,  file="theBindingEnergy.dat",     status="unknown")
+open(unit=25,  file="EXPERIMENT_AME2016.dat",   status="unknown")
+open(unit=26,  file="expBindingEnergy.dat",     status="unknown")
+open(unit=27,  file="expupperdripline.dat",     status="unknown")
+open(unit=28,  file="explowerdripline.dat",     status="unknown")
+open(unit=29,  file="expthediff.dat",           status="unknown")
+
+
+!Finding theoretical Proton/Neutron drip line
+allocate (zdripndep(ZDnrange))
+call ProtonDripLine(ZDnrange, zdripndep)
+NDzrange=zdripndep(ZDnrange)
+allocate (ndripzdep(NDzrange))
+call NeutronDripLine(NDzrange, ndripzdep)
+allocate (theBindingEnergy(NDzrange, ZDnrange))
+allocate (expBindingEnergy(125, 180))
+
+
+!creating matrix of Theoretical Bnding Energies
+do n=1, ZDnrange  
+   do z=1, NDzrange
+       if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
+           write(24, *) n, z !Binding Energy test
+           call BindingE(z, n, theBindingEnergy(z,n))
+       end if
+   end do
+end do
+
+
+!creating matriz of all Experimental Binding Energies
+Do i=1, 3433
+    read(25, *) dummy1, dummy2, a, n, z, expBindEnergy
+    expBindingEnergy(z,n)=expBindEnergy
+    write(26,*) n, z
+end do
+
+
+!finding the borders of the of the experimental Binding Energies Data
+do n=1, 177
+    do z=1, 125
+        if(expBindingEnergy(z-1,n)==0 .and. expBindingEnergy(z,n) /=0)then
+            lowerbound(n)=z
+        end if 
+        if(expBindingEnergy(z-1,n) /=0 .and. expBindingEnergy(z,n)==0)then
+            upperbound(n)=z-1
+        end if
+        !print *, n, z, "exp=", expBindingEnergy(z,n), "the=", theBindingEnergy(z,n)
+    end do
+end do
+
+
+do n=1, 177
+    write(27,*) n, upperbound(n)
+    write(28,*) n, lowerbound(n) 
+    do z=lowerbound(n), upperbound(n)
+        call BindingE(z, n, theBindingEnergy(z,n))
+        !write(24,*) n, z !theBindingEnergy(z,n)/(z+n)
+        !write(26,*) n, -expBindingEnergy(z,n)
+        write(29,*) n, theBindingEnergy(z,n)+expBindingEnergy(z,n)
+        print *, "n=", n, "z=", z  
+        print *, "exp=", -expBindingEnergy(z,n), "the=", theBindingEnergy(z,n), "diff=", expBindingEnergy(z,n)+theBindingEnergy(z,n)   
+        print *, ""
+    end do
+    print *, ""
+    print *, ""
+end do
+
+
+end subroutine BindingEnergy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} currently this subroutine calculates the Proton Drip line as I used to.
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} I have since modified and placed in the regular proton drip line 
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+subroutine testProtonDripLine(ZDnrange, zdripndep)
+implicit none
+integer :: n, z
+integer :: ZDnrange, ZDzrange
+integer :: zdripndep(ZDnrange)
+real    :: bez(4*ZDnrange)
+real    :: sez
+
+
+print *, zdripndep
+
+
+do n=1, ZDnrange
+
+    do z=1, zdripndep(n-1)+10
+        call BindingE(z,n,bez(z))
+        write(21, *) n, z
+    end do
+
+
+    do z=1, zdripndep(n-1)+10
+        sez=bez(z+1)-bez(z)
+        if (sez<0.) then 
+        zdripndep(n)=z
+        exit       
+        end if 
+    end do  
+
+end do
+do n=1, ZDnrange !SEC 1 
+    write(20,*) n, zdripndep(n)
+    print *,    "Proton Drip:   ", "n=", n, " z=", zdripndep(n)
+end do 
+
+end subroutine testProtonDripLine
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+subroutine testNeutronDripLine(NDzrange, ndripzdep)
+implicit none
+integer :: n, z
+integer :: NDnrange, NDzrange
+integer :: ndripzdep(NDzrange)
+real    :: ben(4*NDzrange)
+real    :: sen
+
+do z=1, NDzrange
+
+    do n=1, ndripzdep(z-1)+10
+        call BindingE(z,n,ben(n))
+        write(23, *) n, z
+    end do
+
+
+    do n=1,  ndripzdep(z-1)+10
+        sen=ben(n+1)-ben(n)
+        if (sen<0.) then 
+        ndripzdep(z)=n
+        exit       
+        end if 
+    end do  
+
+end do
+
+do z=1, NDzrange !SEC 1 
+    write(22,*) ndripzdep(z), z
+    print *,    "Neutron Drip: ", " z=", z, " n=", ndripzdep(z)
+end do 
+
+end subroutine testNeutronDripLine
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+
+
+
+
+
+
+
+
 !subroutine to find the binding energy
 subroutine BindingE(z,n,be)
 implicit none
@@ -299,30 +400,37 @@ a=z+n
 !-----------------------------
 !----------LQDM---------------
 !-----------------------------
-p1 =15.5*(A)
-p2=  -16.8*(A**(2./3.))
-p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
-p4= -(23.*((Z-N)**2.))/A
+p1 =15.76*(A)
+p2=  -17.81*(A**(2./3.))
+p3=-(0.711*(Z*(Z-1.))*(A**(-1./3.)))
+p4= -(23.702*((Z-N)**2.))/A
+
+
+!p1 =15.5*(A)
+!p2=  -16.8*(A**(2./3.))
+!p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
+!p4= -(23.*((Z-N)**2.))/A
 !||||||||||||||||||||||||||||||||||
 if(    (mod(z,2)==0)  ) then
-if(    (mod(n,2)==0)  ) then
-p5=34.*(a**(-3./4.))
-!print *, "p5 z,n= even"
-end if
-if(    (mod(n,2)==1)  ) then
-p5=0
-!a is odd
-end if
+    if(    (mod(n,2)==0)  ) then
+        p5=34.*(a**(-3./4.))
+        !print *, "p5 z,n= even"
+    end if
+    if(    (mod(n,2)==1)  ) then
+        p5=0
+        !a is odd
+    end if
 end if !main if
+
 if(    (mod(z,2)==1)  ) then
-if(    (mod(n,2)==1)  ) then
-p5=-34.*(a**(-3./4.))
-!print *, "p5 z,n= odd"
-end if
-if(    (mod(n,2)==0)  ) then
-p5=0
-!a is odd
-end if
+    if(    (mod(n,2)==1)  ) then
+        p5=-34.*(a**(-3./4.))
+        !print *, "p5 z,n= odd"
+    end if
+    if(    (mod(n,2)==0)  ) then
+        p5=0
+        !a is odd
+    end if
 end if !main if
 !p5=0 !ignoring P5
 !-----------------------------
@@ -331,3 +439,16 @@ BE= p1+p2+p3+p4+p5 !creating array of binding energy dependent on N
 !-----------------------------
 !-----------------------------
 end subroutine bindingE
+
+
+
+
+
+
+
+
+
+
+
+
+
