@@ -71,7 +71,6 @@ integer, allocatable :: ndripzdep(:)
 >>>>>>> reformat-branch
 
 
-integer, allocatable :: ndripzdep(:)
 !write(*, "(A)", advance="NO") "desired n range: "
 !read *, ZDnrange
 ZDnrange=177
