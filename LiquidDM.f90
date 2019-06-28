@@ -1,5 +1,67 @@
 program LiquidDM
 implicit none
+<<<<<<< Updated upstream
+=======
+integer              ::  ZDnrange, NDzrange
+integer, allocatable :: zdripndep(:)
+integer, allocatable :: ndripzdep(:)
+
+
+!write(*, "(A)", advance="NO") "desired n range: "
+!read *, ZDnrange
+ZDnrange=177
+
+
+!allocate (zdripndep(ZDnrange))
+!call ProtonDripLine(ZDnrange, zdripndep)
+!NDzrange=zdripndep(ZDnrange)
+!allocate (ndripzdep(NDzrange))
+!call NeutronDripLine(NDzrange, ndripzdep)
+!call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
+call BindingEnergy(ZDnrange)
+
+
+end program LiquidDM
+
+
+!    |||//   ||||||\
+!      //    ||    ||
+!     //     ||    ||
+!    //|||   ||||||/  
+subroutine ProtonDripLine(ZDnrange, zdripndep)
+implicit none
+integer :: n, z
+integer :: ZDnrange
+integer :: initialz, finalz, ZDmaxzrange
+integer :: zdripndep(ZDnrange)
+real    :: befirst, besecond
+real    :: sepE 
+
+
+open(unit=20,  file="Zdrip.dat",                status="unknown")
+open(unit=21,  file="Zdripsearch.dat",          status="unknown")
+
+
+initialz=-5
+finalz=20
+ZDmaxzrange=4*ZDnrange
+do n=1, ZDnrange
+    do z=initialz, finalz
+        call BindingE(z, n, befirst)
+        call BindingE(z+1, n, besecond)
+        sepE=besecond-befirst
+        write(21, *) n, z
+        if (sepE<0 .and. besecond>0 .and. befirst>0)then
+            zdripndep(n)=z
+            initialz=z-10
+            finalz=z+10
+            exit
+        else
+            zdripndep(n)=0
+        end if
+    end do
+end do
+>>>>>>> Stashed changes
 
 real::    sen, sez           
 integer:: z, n, a, i, temp, j=0,f=0, g=0
