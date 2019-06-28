@@ -1,43 +1,26 @@
+
 program LiquidDM
 implicit none
-integer :: n, z, ZDnrange, NDzrange
+integer              ::  ZDnrange, NDzrange
 integer, allocatable :: zdripndep(:)
 integer, allocatable :: ndripzdep(:)
-real,    allocatable :: BindingEarr(:,:)
-open(unit=20,  file="Zdrip.dat",                status="unknown")
-open(unit=21,  file="Zdripsearch.dat",          status="unknown")
-open(unit=22,  file="Ndrip.dat",                status="unknown")
-open(unit=23,  file="Ndripsearch.dat",          status="unknown")
-open(unit=24,  file="BindingEnergy.dat",        status="unknown")
-open(unit=25,  file="BETEST.dat",               status="unknown")
-open(unit=26,  file="SEPTEST.dat",              status="unknown")
-open(unit=27,  file="EXPERIMENT_AME2016.dat",   status="unknown")
 
 
-!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-write(*, "(A)", advance="NO") "desired n range: " !}}}}}}}}}}}}}}}}}}}}}}}} INPUT THE N RANGE 
-read *, ZDnrange!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} 
-!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-!}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
+!write(*, "(A)", advance="NO") "desired n range: "
+!read *, ZDnrange
+ZDnrange=177
 
 
 !allocate (zdripndep(ZDnrange))
 !call ProtonDripLine(ZDnrange, zdripndep)
-
-
 !NDzrange=zdripndep(ZDnrange)
 !allocate (ndripzdep(NDzrange))
 !call NeutronDripLine(NDzrange, ndripzdep)
-
 !call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
 call BindingEnergy(ZDnrange)
 
 
 end program LiquidDM
-
 
 
 !    |||//   ||||||\
@@ -53,37 +36,41 @@ integer :: zdripndep(ZDnrange)
 real    :: befirst, besecond
 real    :: sepE 
 
+
+open(unit=20,  file="Zdrip.dat",                status="unknown")
+open(unit=21,  file="Zdripsearch.dat",          status="unknown")
+
+
 initialz=-5
 finalz=20
 ZDmaxzrange=4*ZDnrange
+do n=1, ZDnrange
+    do z=initialz, finalz
+        call BindingE(z, n, befirst)
+        call BindingE(z+1, n, besecond)
+        sepE=besecond-befirst
+        write(21, *) n, z
+
+        if (sepE<0 .and. besecond>0 .and. befirst>0)then
+            zdripndep(n)=z
+            initialz=z-10
+            finalz=z+10
+            exit
+        else
+            zdripndep(n)=0
+        end if
+    end do
+end do
+
 
 do n=1, ZDnrange
-do z=initialz, finalz
-
-call BindingE(z, n, befirst)
-call BindingE(z+1, n, besecond)
-sepE=besecond-befirst
-
-write(21, *) n, z
-
-if (sepE<0 .and. besecond>0 .and. befirst>0)then
-zdripndep(n)=z
-initialz=z-10
-finalz=z+10
-exit
-else
-zdripndep(n)=0
-end if
-
-end do
+    !print *, "n=", n, "zdripndep(n)=", zdripndep(n)
+    write(20, *) n, zdripndep(n)
 end do
 
-do n=1, ZDnrange
-print *, "n=", n, "zdripndep(n)=", zdripndep(n)
-write(20, *) n, zdripndep(n)
-end do
-print *, ""
+
 end subroutine ProtonDripLine
+
 
 !  |\ || ||||||\
 !  |\\|| ||    ||
@@ -98,100 +85,129 @@ real    :: befirst, besecond, NDmaznrange
 real    :: sepE
 
 
+open(unit=22,  file="Ndrip.dat",                status="unknown")
+open(unit=23,  file="Ndripsearch.dat",          status="unknown")
+
 
 initialn=-5
 finaln=20
 NDmaznrange=4*NDzrange
-
 do z=1, NDzrange
-do n=initialn, finaln
-
-call BindingE(z, n, befirst)
-call BindingE(z, n+1, besecond)
-sepE=besecond-befirst
-
-write(23, *) n, z
-
-if (sepE<0 .and. besecond>0 .and. befirst>0)then
-ndripzdep(z)=n
-initialn=n-10
-finaln=n+10
-exit
-else
-ndripzdep(z)=0
-end if
-end do
+    do n=initialn, finaln
+        call BindingE(z, n, befirst)
+        call BindingE(z, n+1, besecond)
+        sepE=besecond-befirst
+        write(23, *) n, z
+        if (sepE<0 .and. besecond>0 .and. befirst>0)then
+            ndripzdep(z)=n
+            initialn=n-10
+            finaln=n+10
+            exit
+        else
+            ndripzdep(z)=0
+        end if
+    end do
 end do
 
 
 do z=1, NDzrange
-print *, "z=", z, "ndripzdep(z)=", ndripzdep(z)
-write(22, *)  ndripzdep(z), z
+    !print *, "z=", z, "ndripzdep(z)=", ndripzdep(z)
+    write(22, *)  ndripzdep(z), z
 end do
-print *, ""
+
+
 end subroutine NeutronDripLine
 
+
 ! |||||\\    |||||||||
-! ||    \\   ||
-! ||     ||  ||
-! ||    //   ||
-! |||||||    |||||||||
-! ||    \\   ||
-! ||     ||  ||
-! ||    //   ||
+! ||||||\\   ||
+! ||  |||||  ||
+! ||||||//   |||||||||
+! ||||||\\   |||||||||
+! ||  |||||  ||
+! ||||||//   ||
 ! |||||//    |||||||||
 subroutine BindingEnergy(ZDnrange)
 implicit none 
-integer :: i, n, z, a, ZDnrange, NDzrange, alimit
+integer :: i, n, z, a, ZDnrange, NDzrange, lastn, lastz
 integer, allocatable :: zdripndep(:)
 integer, allocatable :: ndripzdep(:)
-real,    allocatable :: BindingEarr(:,:)
-real,    allocatable ::expBindingEarr(:,:)
+real,    allocatable :: theBindingEnergy(:,:)
+real,    allocatable :: expBindingEnergy(:,:)
+integer              :: lowerbound(177)
+integer              :: upperbound(177)
+real                 :: expBindEnergy
+integer              :: dummy1
+character            :: dummy2
 
-real :: expBindEnergy
-integer :: dummy1
-character:: dummy2
 
+!open statements
+open(unit=24,  file="theBindingEnergy.dat",     status="unknown")
+open(unit=25,  file="EXPERIMENT_AME2016.dat",   status="unknown")
+open(unit=26,  file="expBindingEnergy.dat",     status="unknown")
+open(unit=27,  file="expupperdripline.dat",     status="unknown")
+open(unit=28,  file="explowerdripline.dat",     status="unknown")
+open(unit=29,  file="expthediff.dat",           status="unknown")
+
+
+!Finding theoretical Proton/Neutron drip line
 allocate (zdripndep(ZDnrange))
 call ProtonDripLine(ZDnrange, zdripndep)
 NDzrange=zdripndep(ZDnrange)
 allocate (ndripzdep(NDzrange))
 call NeutronDripLine(NDzrange, ndripzdep)
-allocate (BindingEarr(NDzrange, ZDnrange))
-allocate (expBindingEarr(NDzrange, ZDnrange))
-alimit=NDzrange+ZDnrange
+allocate (theBindingEnergy(NDzrange, ZDnrange))
+allocate (expBindingEnergy(125, 180))
 
 
-do n=1, ZDnrange
+!creating matrix of Theoretical Bnding Energies
+do n=1, ZDnrange  
    do z=1, NDzrange
        if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-       write(24, *) n, z !Binding Energy test
-       call BindingE(z, n, BindingEarr(z,n))
-       print *, "n=", n, "z=", z, "BE=", BindingEarr(z, n)
+           write(24, *) n, z !Binding Energy test
+           call BindingE(z, n, theBindingEnergy(z,n))
        end if
    end do
 end do
 
-!Do i=1, 40
-!had to delete first two lines of EXPERIMENT_AME2016 so that it reads properly
-!read(27, *) dummy1, dummy2, a, n, z, expBindEnergy
-!print *, 'dummy1=', dummy1, 'n=', n, 'z=', z, "experimental: BE=", expBindEnergy
-!print *, ""
-!if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-!print *, "n=", n, "z=", z, "theoretical:   BE=", BindingEarr(z, n)
-!end if
-!end do
 
-
-!Do while(z<=NDzrange ) 
-!read(27, *) dummy1, dummy2, a, n, z, expBindEnergy
-!write (*, 32) n, z, expBindEnergy, BindingEarr(z,n), expBindEnergy+BindingEarr(z, n)
-!32 format(  1x 'n=', I3, 1x 'z=', I3, 1x "experimental: BE=", F10.5, 1x "theoretical:   BE=", F10.5, 1x, "difference=", 2x ,F10.5  )
-!end if
-
+!creating matriz of all Experimental Binding Energies
+Do i=1, 3433
+    read(25, *) dummy1, dummy2, a, n, z, expBindEnergy
+    expBindingEnergy(z,n)=expBindEnergy
+    write(26,*) n, z
 end do
 
 
+!finding the borders of the of the experimental Binding Energies Data
+do n=1, 177
+    do z=1, 125
+        if(expBindingEnergy(z-1,n)==0 .and. expBindingEnergy(z,n) /=0)then
+            lowerbound(n)=z
+        end if 
+        if(expBindingEnergy(z-1,n) /=0 .and. expBindingEnergy(z,n)==0)then
+            upperbound(n)=z-1
+        end if
+        !print *, n, z, "exp=", expBindingEnergy(z,n), "the=", theBindingEnergy(z,n)
+    end do
+end do
+
+
+do n=1, 177
+    write(27,*) n, upperbound(n)
+    write(28,*) n, lowerbound(n) 
+    do z=lowerbound(n), upperbound(n)
+        call BindingE(z, n, theBindingEnergy(z,n))
+        !write(24,*) n, z !theBindingEnergy(z,n)/(z+n)
+        !write(26,*) n, -expBindingEnergy(z,n)
+        write(29,*) n, theBindingEnergy(z,n)+expBindingEnergy(z,n)
+        print *, "n=", n, "z=", z  
+        print *, "exp=", -expBindingEnergy(z,n), "the=", theBindingEnergy(z,n), "diff=", expBindingEnergy(z,n)+theBindingEnergy(z,n)   
+        print *, ""
+    end do
+    print *, ""
+    print *, ""
+end do
 
 
 end subroutine BindingEnergy
@@ -200,32 +216,6 @@ end subroutine BindingEnergy
 
 
 
-subroutine ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
-implicit none
-integer :: n, z
-integer :: ZDnrange, ZDmaxzrange
-integer :: zdripndep(ZDnrange)
-real    :: bez(ZDnrange)
-real    :: sez
-ZDmaxzrange=ZDnrange
-
-do n=1, ZDnrange
-    do z=1, ZDmaxzrange
-
-        call BindingE(z, n, bez(z))
-        call BindingE(z+1, n, bez(z+1))
-        write(25, *) n, bez(z) 
-        if(bez(z+1)>0 .and. bez(z)>0) then    
-        sez=bez(z+1)-bez(z)
-        if(sez>0)then
-        write(26, *) n, sez
-        end if
-        end if
-
-    end do 
-end do
-
-end subroutine ProntonDripSeparationBindingEnergy
 
 
 
@@ -344,10 +334,16 @@ a=z+n
 !-----------------------------
 !----------LQDM---------------
 !-----------------------------
-p1 =15.5*(A)
-p2=  -16.8*(A**(2./3.))
-p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
-p4= -(23.*((Z-N)**2.))/A
+p1 =15.76*(A)
+p2=  -17.81*(A**(2./3.))
+p3=-(0.711*(Z*(Z-1.))*(A**(-1./3.)))
+p4= -(23.702*((Z-N)**2.))/A
+
+
+!p1 =15.5*(A)
+!p2=  -16.8*(A**(2./3.))
+!p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
+!p4= -(23.*((Z-N)**2.))/A
 !||||||||||||||||||||||||||||||||||
 if(    (mod(z,2)==0)  ) then
     if(    (mod(n,2)==0)  ) then
