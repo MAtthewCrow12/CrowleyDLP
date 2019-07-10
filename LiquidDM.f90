@@ -140,6 +140,7 @@ real                 :: expBindEnergy
 integer              :: dummy1
 character            :: dummy2
 
+real                 :: diff
 
 !open statements
 open(unit=24,  file="theBindingEnergy.dat",     status="unknown")
@@ -156,58 +157,58 @@ call ProtonDripLine(ZDnrange, zdripndep)
 NDzrange=zdripndep(ZDnrange)
 allocate (ndripzdep(NDzrange))
 call NeutronDripLine(NDzrange, ndripzdep)
-allocate (theBindingEnergy(NDzrange, ZDnrange))
+!allocate (theBindingEnergy(NDzrange, ZDnrange))
+allocate (theBindingEnergy(125, 180))
 allocate (expBindingEnergy(125, 180))
 
 
-!creating matrix of Theoretical Bnding Energies
-do n=1, ZDnrange  
-   do z=1, NDzrange
-       if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
-           write(24, *) n, z !Binding Energy test
-           call BindingE(z, n, theBindingEnergy(z,n))
-       end if
-   end do
-end do
+!creating matrix of Theoretical Bnding Energies WITHIN THEORETICAL BINDING ENERGY DRIP LINES
+!do n=1, ZDnrange  
+   !do z=1, NDzrange
+       !if(z<=zdripndep(n) .and. n<=ndripzdep(z)) then
+           !call BindingE(z, n, theBindingEnergy(z,n))
+       !end if
+   !end do
+!end do
 
 
 !creating matriz of all Experimental Binding Energies
 Do i=1, 3433
     read(25, *) dummy1, dummy2, a, n, z, expBindEnergy
     expBindingEnergy(z,n)=expBindEnergy
-    write(26,*) n, z
+    !call BindingE(z, n, theBindingEnergy(z,n))
+    !write(24,*) n, theBindingEnergy(z,n)
+    !write(26,*) n, -expBindingEnergy(z,n)
+    !write(29,*) n, theBindingEnergy(z,n)+expBindingEnergy(z,n)
 end do
 
 
 !finding the borders of the of the experimental Binding Energies Data
 do n=1, 177
-    do z=1, 125
+    do z=1, 120
         if(expBindingEnergy(z-1,n)==0 .and. expBindingEnergy(z,n) /=0)then
             lowerbound(n)=z
+            write(28,*) n, lowerbound(n)
         end if 
         if(expBindingEnergy(z-1,n) /=0 .and. expBindingEnergy(z,n)==0)then
             upperbound(n)=z-1
+            write(27,*) n, upperbound(n)
         end if
-        !print *, n, z, "exp=", expBindingEnergy(z,n), "the=", theBindingEnergy(z,n)
     end do
 end do
-
 
 do n=1, 177
-    write(27,*) n, upperbound(n)
-    write(28,*) n, lowerbound(n) 
     do z=lowerbound(n), upperbound(n)
+        if (z<93 .and. z>19) then 
         call BindingE(z, n, theBindingEnergy(z,n))
-        !write(24,*) n, z !theBindingEnergy(z,n)/(z+n)
-        !write(26,*) n, -expBindingEnergy(z,n)
-        write(29,*) n, theBindingEnergy(z,n)+expBindingEnergy(z,n)
-        print *, "n=", n, "z=", z  
-        print *, "exp=", -expBindingEnergy(z,n), "the=", theBindingEnergy(z,n), "diff=", expBindingEnergy(z,n)+theBindingEnergy(z,n)   
-        print *, ""
+        write(24,*) n, theBindingEnergy(z,n)
+        write(26,*) n, -expBindingEnergy(z,n)
+        write(29,*) n, z, theBindingEnergy(z,n)+expBindingEnergy(z,n)
+        end if
     end do
-    print *, ""
-    print *, ""
 end do
+
+
 
 
 end subroutine BindingEnergy
@@ -336,7 +337,11 @@ a=z+n
 !-----------------------------
 p1 =15.76*(A)
 p2=  -17.81*(A**(2./3.))
-p3=-(0.711*(Z*(Z-1.))*(A**(-1./3.)))
+!p3= -(0.711*(Z*(Z-1.))*(A**(-1./3.)))
+!!!!!
+p3=- 0.711 * (z**2.) * a**(-1./3.)     !BETTER          !-(0.711*(Z*(Z-1.))*(A**(-1./3.)))
+!!!!!
+
 p4= -(23.702*((Z-N)**2.))/A
 
 
@@ -345,28 +350,44 @@ p4= -(23.702*((Z-N)**2.))/A
 !p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
 !p4= -(23.*((Z-N)**2.))/A
 !||||||||||||||||||||||||||||||||||
-if(    (mod(z,2)==0)  ) then
-    if(    (mod(n,2)==0)  ) then
-        p5=34.*(a**(-3./4.))
+!if(    (mod(z,2)==0)  ) then
+    !if(    (mod(n,2)==0)  ) then
+    !    p5=34.*(a**(-3./4.))
         !print *, "p5 z,n= even"
-    end if
-    if(    (mod(n,2)==1)  ) then
-        p5=0
+    !end if
+    !if(    (mod(n,2)==1)  ) then
+     !   p5=0
         !a is odd
-    end if
-end if !main if
+    !end if
+!end if !main if
 
-if(    (mod(z,2)==1)  ) then
-    if(    (mod(n,2)==1)  ) then
-        p5=-34.*(a**(-3./4.))
-        !print *, "p5 z,n= odd"
-    end if
-    if(    (mod(n,2)==0)  ) then
-        p5=0
+!if(    (mod(z,2)==1)  ) then
+!    if(    (mod(n,2)==1)  ) then
+!        p5=-34.*(a**(-3./4.))
+!        !print *, "p5 z,n= odd"
+!    end if
+!    if(    (mod(n,2)==0)  ) then
+!        p5=0
         !a is odd
-    end if
-end if !main if
-!p5=0 !ignoring P5
+!    end if
+!end if 
+if(    (mod(z,2)==0) .and.  (mod(n,2)==0)  ) then
+    
+    p5=34.*(a**(-3./4.))
+    
+else if (    (mod(z,2)==1) .and.  (mod(n,2)==1)  ) then
+        
+    p5=-34.*(a**(-3./4.))
+
+else
+
+    p5=0 
+
+end if
+
+
+
+
 !-----------------------------
 BE= p1+p2+p3+p4+p5 !creating array of binding energy dependent on N
 !-----------------------------
