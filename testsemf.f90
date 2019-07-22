@@ -2,16 +2,18 @@ program testsemf
 implicit none
 integer :: z, n, a
 real    ::be
+open(unit=20,  file="check_py_ldm.dat",                status="unknown")
 
-
-do n=1, 5
+do n=1, 60
     !print *, "n=", n
     print  *, "!!!!!!"
-    do z=1, 5
+    do z=1, 60
 
         call BindingE(z,n,be)
         !print  *, "a=", n+z, "n=", n, "z=", z, "be=", be
-    end do
+        write(20, *) z, n, be
+
+end do
     print  *, "!!!!!!"
 end do
 
@@ -70,21 +72,21 @@ p4= -(23.702*((Z-N)**2.))/A
 !    end if
 !end if 
 
-print *, '!!!!!'
+!print *, '!!!!!'
 if(    (mod(z,2)==0) .and.  (mod(n,2)==0)  ) then
     
-    p5test=34.*(a**(-3./4.))
-    print *, "n/z EVEN  p5 !=0 & +"
+    p5=34.*(a**(-3./4.))
+    !print *, "n/z EVEN  p5 !=0 & +"
     
 else if (    (mod(z,2)==1) .and.  (mod(n,2)==1)  ) then
         
-    p5test=-34.*(a**(-3./4.))
-    print *, "n/z ODD  p5 !=0 & -"
+    p5=-34.*(a**(-3./4.))
+    !print *, "n/z ODD  p5 !=0 & -"
 
 else
 
-    p5test=0 
-    print *, "A odd p5=0"
+    p5=0 
+    !print *, "A odd p5=0"
 
 end if
 
@@ -94,14 +96,14 @@ BE= p1+p2+p3+p4+p5 !creating array of binding energy dependent on N
 !-----------------------------
 !-----------------------------
 !-----------------------------
-print *, 'n=', n
-print *, 'z=', z
-print *, 'a=',  a
-print *, 'p1=',  p1
-print *, 'p2=',  p2
-print *, 'p3=',  p3
-print *, 'p4=',  p4
-print *, 'p5=',  p5test
-print *, 'BE=',  BE
+!print *, 'n=', n
+!print *, 'z=', z
+!print *, 'a=',  a
+!print *, 'p1=',  p1
+!print *, 'p2=',  p2
+!print *, 'p3=',  p3
+!print *, 'p4=',  p4
+!print *, 'p5=',  p5test
+print *, 'N,Z', n,z, 'BE=',  BE
 
 end subroutine bindingE

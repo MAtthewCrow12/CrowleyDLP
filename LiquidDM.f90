@@ -6,18 +6,19 @@ integer, allocatable :: zdripndep(:)
 integer, allocatable :: ndripzdep(:)
 
 
+
 !write(*, "(A)", advance="NO") "desired n range: "
 !read *, ZDnrange
 ZDnrange=177
 
 
-!allocate (zdripndep(ZDnrange))
-!call ProtonDripLine(ZDnrange, zdripndep)
+allocate (zdripndep(ZDnrange))
+call ProtonDripLine(ZDnrange, zdripndep)
 !NDzrange=zdripndep(ZDnrange)
 !allocate (ndripzdep(NDzrange))
 !call NeutronDripLine(NDzrange, ndripzdep)
 !call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
-call BindingEnergy(ZDnrange)
+!call BindingEnergy(ZDnrange)
 
 
 end program LiquidDM
@@ -44,26 +45,41 @@ open(unit=21,  file="Zdripsearch.dat",          status="unknown")
 initialz=-5
 finalz=20
 ZDmaxzrange=4*ZDnrange
-do n=1, ZDnrange
+do n=2, ZDnrange
+
     do z=initialz, finalz
         call BindingE(z, n, befirst)
         call BindingE(z+1, n, besecond)
         sepE=besecond-befirst
         write(21, *) n, z
+    
+        print *, 'n: ', n, 'z:', z
+        !print *, 'initialz:', initialz
+        !print *, 'finalz:', finalz
+        print *, 'first: ', befirst
+        print *, 'second: ', besecond
+        print *, 'separation: ', sepE
+        print *, ' '
+        
 
         if (sepE<0 .and. besecond>0 .and. befirst>0)then
+            print *, 'IF STATEMENT ACTIVATED !!!!!!!!!!!'
+            print *, ' '
+            print *, ' '
             zdripndep(n)=z
             initialz=z-10
             finalz=z+10
             exit
-        else
-            zdripndep(n)=0
+        !else
+            !zdripndep(n)=0
         end if
     end do
+
+    print *, ' '
 end do
 
 
-do n=1, ZDnrange
+do n=2, ZDnrange
     !print *, "n=", n, "zdripndep(n)=", zdripndep(n)
     write(20, *) n, zdripndep(n)
 end do
@@ -384,7 +400,7 @@ else
     p5=0 
 
 end if
-p5=0
+
 
 
 
