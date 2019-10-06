@@ -13,12 +13,12 @@ ZDnrange=177
 
 
 allocate (zdripndep(ZDnrange))
-call ProtonDripLine(ZDnrange, zdripndep)
+!call ProtonDripLine(ZDnrange, zdripndep)
 !NDzrange=zdripndep(ZDnrange)
 !allocate (ndripzdep(NDzrange))
 !call NeutronDripLine(NDzrange, ndripzdep)
 !call ProntonDripSeparationBindingEnergy(ZDnrange, zdripndep)
-!call BindingEnergy(ZDnrange)
+call BindingEnergy(ZDnrange)
 
 
 end program LiquidDM
@@ -108,7 +108,7 @@ open(unit=23,  file="Ndripsearch.dat",          status="unknown")
 initialn=-5
 finaln=20
 NDmaznrange=4*NDzrange
-do z=1, NDzrange
+do z=2, NDzrange
     do n=initialn, finaln
         call BindingE(z, n, befirst)
         call BindingE(z, n+1, besecond)
@@ -217,7 +217,8 @@ do n=1, 177
     do z=lowerbound(n), upperbound(n)
         if (z<93 .and. z>19) then 
         call BindingE(z, n, theBindingEnergy(z,n))
-        write(24,*) n, theBindingEnergy(z,n)
+        write(24,*) z,n, theBindingEnergy(z,n)
+
         write(26,*) n, -expBindingEnergy(z,n)
         write(29,*) n, z, theBindingEnergy(z,n)+expBindingEnergy(z,n)
         end if

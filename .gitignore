@@ -1,2 +1,8 @@
 C++.gitignore
 BEMattest.dat gitignore
+*.dat
+.ipynb_checkpoints/bias&variance_examination-checkpoint.ipynb
+*.dat
+*.dat
+dft_mass_tables/UNEDF1_all_nuclei-new.dat
+dft_mass_tables/UNEDF1_all_nuclei-new.dat
