@@ -38,41 +38,11 @@ p2=  -17.81*(A**(2./3.))
 p3=- 0.711 * (z**2.) * a**(-1./3.)                !-(0.711*(Z*(Z-1.))*(A**(-1./3.)))
 
 p4= -(23.702*((Z-N)**2.))/A
-!print *, p1
-!print *, p2
-!print *, "!!!"
-!print *, p3
-!print *, "!!!"
-!print *, p4
 
-!p1 =15.5*(A)
-!p2=  -16.8*(A**(2./3.))
-!p3=-(0.72*(Z*(Z-1.))*(A**(-1./3.)))
-!p4= -(23.*((Z-N)**2.))/A
-!||||||||||||||||||||||||||||||||||
-!if(    (mod(z,2)==0)  ) then
-!    if(    (mod(n,2)==0)  ) then
-!        p5=34.*(a**(-3./4.))
-!        print *, "p5 z,n= even"
-!    end if
-!    if(    (mod(n,2)==1)  ) then
-!        p5=0
-!        print*, "a is odd"
-!    end if
-!end if !main if
 
-!if(    (mod(z,2)==1)  ) then
-!    if(    (mod(n,2)==1)  ) then
-!        p5=-34.*(a**(-3./4.))
-!        print *, "p5 z,n= odd"
-!    end if
-!    if(    (mod(n,2)==0)  ) then
-!        p5=0
-!       !print *, "a is odd"
-!    end if
-!end if 
 
-!print *, '!!!!!'
+
+
 if(    (mod(z,2)==0) .and.  (mod(n,2)==0)  ) then
     
     p5=34.*(a**(-3./4.))
